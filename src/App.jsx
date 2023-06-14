@@ -18,7 +18,7 @@ function App () {
 }
 
 const ComponentOne = () => <section>组件一<User /></section>
-const ComponentTwo = () => <section>组件二<UserModifier /></section>
+const ComponentTwo = () => <section>组件二<Wrapper /></section>
 const ComponentThree = () => <section>组件三</section>
 
 const User = () => {
@@ -36,20 +36,26 @@ const reducer = (state, { type, payload }) => {
       }
     }
   }
-  
+
   return state
 }
 
-const UserModifier = () => {
-  const contextValue = useContext(appContext)
-  const { appState, setAppState } = contextValue
+const Wrapper = () => {
+  const { appState, setAppState } = useContext(appContext)
+  const dispatch = (action) => {
+    setAppState(reducer(appState, action))
+  }
+
+  return <UserModifier dispatch={dispatch} state={appState} />
+}
+
+const UserModifier = ({ dispatch, state }) => {
   const onChange = e => {
-    appState.user.name = e.target.value
-    setAppState(reducer(appState, { type: 'updateUser', payload: { name: e.target.value } }))
+    dispatch({ type: 'updateUser', payload: { name: e.target.value } })
   }
 
   return <div>
-    <input value={contextValue.appState.user.name}
+    <input value={state.user.name}
       onChange={onChange}
     />
   </div>
