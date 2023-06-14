@@ -1,14 +1,34 @@
 import React from 'react'
 import { connectToUser } from './connecters/connectToUser.js'
-import { appContext, store, connect } from './redux.jsx'
+import { Provider, connect, createStore } from './redux.jsx'
+
+const reducer = (state, { type, payload }) => {
+  if (type === 'updateUser') {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        ...payload
+      }
+    }
+  }
+  return state
+}
+
+const initState = {
+  user: { name: 'fishworm', age: 18 },
+  group: { name: '前端组' }
+}
+
+const store = createStore(reducer, initState)
 
 function App () {
   return (
-    <appContext.Provider value={store}>
+    <Provider store={store}>
       <ComponentOne />
       <ComponentTwo />
       <ComponentThree />
-    </appContext.Provider>
+    </Provider>
   )
 }
 
@@ -24,7 +44,9 @@ const ComponentThree = connect(state => {
   return { group: state.group }
 })(({ group }) => {
   console.log('componentThree' + Math.random())
-  return <section>组件三<div>Group: {group.name}</div></section>
+  return <section>组件三<div>
+    Group: {group.name}</div>
+  </section>
 })
 
 const User = connectToUser(({ user }) => {

@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react'
 
 export const store = {
   state: {
-    user: { name: 'fishworm', age: 18 },
-    group: { name: '前端组' }
+    user: undefined,
+    group: undefined
   },
   setState (newState) {
     store.state = newState
@@ -29,24 +29,16 @@ const changed = (oldState, newState) => {
   return changed
 }
 
-export const reducer = (state, { type, payload }) => {
-  if (type === 'updateUser') {
-    return {
-      ...state,
-      user: {
-        ...state.user,
-        ...payload
-      }
-    }
-  }
-
-  return state
+export const createStore = (reducer, initState) => {
+  store.state = initState
+  store.reducer = reducer
+  return store
 }
 
 export const connect = (selector, dispatchSelector) => (Component) => {
   return (props) => {
     const dispatch = (action) => {
-      setState(reducer(state, action))
+      setState(store.reducer(state, action))
     }
     const { state, setState } = useContext(appContext)
     const [, update] = useState({})
@@ -69,3 +61,11 @@ export const connect = (selector, dispatchSelector) => (Component) => {
 }
 
 export const appContext = React.createContext(null)
+
+export const Provider = ({store, children}) => {
+  return (
+    <appContext.Provider value={store}>
+      {children}
+    </appContext.Provider>
+  )
+}
