@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useState } from 'react'
 
 export const store = {
   state: {
-    user: { name: 'fishworm', age: 18 }
+    user: { name: 'fishworm', age: 18 },
+    group: { name: '前端组' }
   },
   setState (newState) {
     store.state = newState
@@ -16,6 +17,16 @@ export const store = {
       store.listeners.splice(index, 1)
     }
   }
+}
+
+const changed = (oldState, newState) => {
+  let changed = false
+  for (let key in oldState) {
+    if (oldState[key] !== newState[key]) {
+      changed = true
+    }
+  }
+  return changed
 }
 
 export const reducer = (state, { type, payload }) => {
@@ -39,9 +50,14 @@ export const connect = (selector) => (Component) => {
     const data = selector ? selector(state) : { state }
     useEffect(() => {
       store.subscribe(() => {
-        update({})
+        const newData = selector 
+        ? selector(store.state) 
+        : { state: store.state }
+        if (changed(data, newData)) {
+          update({})
+        }
       })
-    }, [])
+    }, [selector])
     const dispatch = (action) => {
       setState(reducer(state, action))
     }

@@ -19,14 +19,16 @@ const ComponentTwo = () => {
   console.log('componentTwo' + Math.random())
   return <section>组件二<UserModifier /></section>
 }
-const ComponentThree = () => {
+const ComponentThree = connect(state => {
+  return { group: state.group }
+})(({ group }) => {
   console.log('componentThree' + Math.random())
-  return <section>组件三</section>
-}
+  return <section>组件三<div>Group: {group.name}</div></section>
+})
 
 const User = connect((state) => {
-  return {user: state.user}
-})(({user}) => {
+  return { user: state.user }
+})(({ user }) => {
   console.log('User执行了' + Math.random())
   return <div>User: {user.name}</div>
 })
