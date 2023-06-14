@@ -1,15 +1,9 @@
-import { useState, useContext, createContext } from "react"
-
-const appContext = createContext(null)
+import React from 'react'
+import { appContext, store, connect } from './redux.jsx'
 
 function App () {
-  const [appState, setAppState] = useState({
-    user: { name: "fishworm", age: 18 }
-  })
-  const contextValue = { appState, setAppState }
-
   return (
-    <appContext.Provider value={contextValue}>
+    <appContext.Provider value={store}>
       <ComponentOne />
       <ComponentTwo />
       <ComponentThree />
@@ -17,40 +11,28 @@ function App () {
   )
 }
 
-const ComponentOne = () => <section>组件一<User /></section>
-const ComponentTwo = () => <section>组件二<UserModifier /></section>
-const ComponentThree = () => <section>组件三</section>
-
-const User = () => {
-  const contextValue = useContext(appContext)
-  return <div>User: {contextValue.appState.user.name}</div>
+const ComponentOne = () => {
+  console.log('componentOne' + Math.random())
+  return <section>组件一<User /></section>
+}
+const ComponentTwo = () => {
+  console.log('componentTwo' + Math.random())
+  return <section>组件二<UserModifier /></section>
+}
+const ComponentThree = () => {
+  console.log('componentThree' + Math.random())
+  return <section>组件三</section>
 }
 
-const reducer = (state, { type, payload }) => {
-  if (type === 'updateUser') {
-    return {
-      ...state,
-      user: {
-        ...state.user,
-        ...payload
-      }
-    }
-  }
+const User = connect(({ state, dispatch }) => {
+  console.log('User执行了' + Math.random())
+  return <div>User: {state.user.name}</div>
+})
 
-  return state
-}
 
-const connect = (Component) => {
-  return (props) => {
-    const {appState, setAppState} = useContext(appContext)
-    const dispatch = (action) => {
-      setAppState(reducer(appState, action))
-    }
-    return <Component {...props} dispatch={dispatch} state={appState} />
-  }
-}
 
 const UserModifier = connect(({ dispatch, state, children }) => {
+  console.log('UserModifier执行了' + Math.random())
   const onChange = e => {
     dispatch({ type: 'updateUser', payload: { name: e.target.value } })
   }
