@@ -1,23 +1,30 @@
 import React, { useContext, useEffect, useState } from 'react'
 
+let state = undefined
+let reducer = undefined
+let listeners = []
+const setState = (newState) => {
+  state = newState
+  listeners.map(fn => fn(state))
+}
+
 export const store = {
-  state: {
-    user: undefined,
-    group: undefined
+  getState () {
+    return state
   },
-  setState (newState) {
-    store.state = newState
-    store.listeners.map(fn => fn(store.state))
+  dispatch: (action) => {
+    setState(reducer(state, action))
   },
-  listeners: [],
   subscribe (fn) {
-    store.listeners.push(fn)
+    listeners.push(fn)
     return () => {
-      const index = store.listeners.indexOf(fn)
-      store.listeners.splice(index, 1)
+      const index = listeners.indexOf(fn)
+      listeners.splice(index, 1)
     }
   }
 }
+
+const dispatch = store.dispatch
 
 const changed = (oldState, newState) => {
   let changed = false
@@ -29,18 +36,14 @@ const changed = (oldState, newState) => {
   return changed
 }
 
-export const createStore = (reducer, initState) => {
-  store.state = initState
-  store.reducer = reducer
+export const createStore = (_reducer, initState) => {
+  state = initState
+  reducer = _reducer
   return store
 }
 
 export const connect = (selector, dispatchSelector) => (Component) => {
   const Wrapper = (props) => {
-    const dispatch = (action) => {
-      setState(store.reducer(state, action))
-    }
-    const { state, setState } = useContext(appContext)
     const data = selector ? selector(state) : { state }
     const dispatchers = dispatchSelector
       ? dispatchSelector(dispatch)
@@ -49,8 +52,8 @@ export const connect = (selector, dispatchSelector) => (Component) => {
     useEffect(() => {
       store.subscribe(() => {
         const newData = selector
-          ? selector(store.state)
-          : { state: store.state }
+          ? selector(state)
+          : { state: state }
         if (changed(data, newData)) {
           update({})
         }
