@@ -28,11 +28,15 @@ let dispatch = store.dispatch
 
 const prevDispatch = dispatch
 
+const prevDispatch2 = dispatch
+
 dispatch = (action) => {
-  if (action instanceof Function) {
-    action(dispatch)
+  if (action.payload instanceof Promise) {
+    action.payload.then(data => {
+      dispatch({...action, payload: data})
+    })
   } else {
-    prevDispatch(action)
+    prevDispatch2(action)
   }
 }
 
