@@ -33,7 +33,7 @@ const prevDispatch2 = dispatch
 dispatch = (action) => {
   if (action.payload instanceof Promise) {
     action.payload.then(data => {
-      dispatch({...action, payload: data})
+      dispatch({ ...action, payload: data })
     })
   } else {
     prevDispatch2(action)
@@ -63,16 +63,14 @@ export const connect = (selector, dispatchSelector) => (Component) => {
       ? dispatchSelector(dispatch)
       : { dispatch }
     const [, update] = useState({})
-    useEffect(() => {
-      store.subscribe(() => {
-        const newData = selector
-          ? selector(state)
-          : { state: state }
-        if (changed(data, newData)) {
-          update({})
-        }
-      })
-    }, [selector])
+    useEffect(() => store.subscribe(() => {
+      const newData = selector
+        ? selector(state)
+        : { state: state }
+      if (changed(data, newData)) {
+        update({})
+      }
+    }), [selector])
     return <Component {...props} {...data} {...dispatchers} />
   }
   return Wrapper
